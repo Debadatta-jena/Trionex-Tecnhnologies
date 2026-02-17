@@ -53,11 +53,11 @@ import { Feedback } from "./feedback/entities/feedback.entity";
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         type: "postgres",
-        host: configService.get("DB_HOST"),
-        port: +configService.get("DB_PORT"),
-        username: configService.get("DB_USERNAME"),
-        password: configService.get("DB_PASSWORD"),
-        database: configService.get("DB_DATABASE"),
+        host: configService.get("DB_HOST") || "localhost",
+        port: +(configService.get("DB_PORT") || "5432"),
+        username: configService.get("DB_USERNAME") || "postgres",
+        password: configService.get("DB_PASSWORD") || "password",
+        database: configService.get("DB_DATABASE") || "trionex_db",
         entities: [User, Project, Testimonial, Contact, Feedback],
         synchronize: configService.get("NODE_ENV") === "development",
         logging: configService.get("NODE_ENV") === "development",
@@ -71,8 +71,8 @@ import { Feedback } from "./feedback/entities/feedback.entity";
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => [
         {
-          ttl: +configService.get("RATE_LIMIT_TTL") || 60,
-          limit: +configService.get("RATE_LIMIT_MAX") || 100,
+          ttl: +(configService.get("RATE_LIMIT_TTL") || "60000"),
+          limit: +(configService.get("RATE_LIMIT_MAX") || "100"),
         },
       ],
       inject: [ConfigService],
