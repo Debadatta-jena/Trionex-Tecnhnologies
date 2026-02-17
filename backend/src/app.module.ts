@@ -49,23 +49,29 @@ import { Feedback } from "./feedback/entities/feedback.entity";
       inject: [ConfigService],
     }),
 
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: "postgres",
-        host: configService.get("DB_HOST") || "localhost",
-        port: +(configService.get("DB_PORT") || "5432"),
-        username: configService.get("DB_USERNAME") || "postgres",
-        password: configService.get("DB_PASSWORD") || "password",
-        database: configService.get("DB_DATABASE") || "trionex_db",
-        entities: [User, Project, Testimonial, Contact, Feedback],
-        synchronize: configService.get("NODE_ENV") === "development",
-        logging: configService.get("NODE_ENV") === "development",
-        migrations: ["dist/migrations/*.js"],
-        migrationsRun: true,
-      }),
-      inject: [ConfigService],
-    }),
+    // Only connect to database if DB_HOST or DATABASE_URL is provided
+    ...(process.env.DATABASE_URL || process.env.DB_HOST
+      ? [
+          TypeOrmModule.forRootAsync({
+            imports: [ConfigModule],
+            useFactory: (configService: ConfigService) => ({
+              type: "postgres",
+              url: configService.get("DATABASE_URL"),
+              host: configService.get("DB_HOST") || "localhost",
+              port: +(configService.get("DB_PORT") || "5432"),
+              username: configService.get("DB_USERNAME") || "postgres",
+              password: configService.get("DB_PASSWORD") || "password",
+              database: configService.get("DB_DATABASE") || "trionex_db",
+              entities: [User, Project, Testimonial, Contact, Feedback],
+              synchronize: configService.get("NODE_ENV") === "development",
+              logging: configService.get("NODE_ENV") === "development",
+              migrations: ["dist/migrations/*.js"],
+              migrationsRun: true,
+            }),
+            inject: [ConfigService],
+          }),
+        ]
+      : []),
 
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
