@@ -11,7 +11,7 @@
     "build:backend": "cd backend && npm run build",
     "build:frontend": "cd frontend && npm run build",
     "build:all": "npm run build:backend && npm run build:frontend",
-    "start": "cd backend && npm run start:prod",
+    "start": "cd backend && npm run build && cd ../backend && npm run start:prod",
     "start:backend": "cd backend && npm run start:prod",
     "start:frontend": "cd frontend && npm start",
     "dev:backend": "cd backend && npm run start:dev",
