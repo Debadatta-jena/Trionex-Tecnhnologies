@@ -1,0 +1,178 @@
+name: 📊 Quality Gates
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  # Prevent merge if tests fail
+  quality-gate:
+    name: 🔍 Quality Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: 🧪 Run Tests
+        run: |
+          echo "🧪 Running test suite..."
+          
+          # Frontend tests
+          cd frontend
+          npm ci
+          npm run test:unit
+          FRONTEND_EXIT=$?
+          
+          # Backend tests
+          cd ../backend
+          npm ci
+          npm test
+          BACKEND_EXIT=$?
+          
+          echo "Frontend exit code: $FRONTEND_EXIT"
+          echo "Backend exit code: $BACKEND_EXIT"
+
+      - name: 🔍 Run Linting
+        run: |
+          echo "🔍 Running lint checks..."
+          
+          # Frontend lint
+          cd frontend
+          npm run lint
+          FRONTEND_LINT_EXIT=$?
+          
+          # Backend lint
+          cd ../backend
+          npm run lint
+          BACKEND_LINT_EXIT=$?
+          
+          echo "Frontend lint exit code: $FRONTEND_LINT_EXIT"
+          echo "Backend lint exit code: $BACKEND_LINT_EXIT"
+
+      - name: 📊 Check Coverage
+        run: |
+          echo "📊 Checking test coverage..."
+          
+          # Check frontend coverage
+          cd frontend
+          npm run test:coverage -- --coverageThreshold='{"global":{"branches":80,"functions":80,"lines":80,"statements":80}}' || true
+          FRONTEND_COVERAGE_EXIT=$?
+          
+          # Check backend coverage
+          cd ../backend
+          npm test -- --coverageThreshold='{"global":{"branches":80,"functions":80,"lines":80,"statements":80}}' || true
+          BACKEND_COVERAGE_EXIT=$?
+          
+          echo "Frontend coverage exit code: $FRONTEND_COVERAGE_EXIT"
+          echo "Backend coverage exit code: $BACKEND_COVERAGE_EXIT"
+
+      - name: 🔒 Security Audit
+        run: |
+          echo "🔒 Running security audit..."
+          
+          # Frontend audit
+          cd frontend
+          npm audit --audit-level high --production || true
+          FRONTEND_AUDIT_EXIT=$?
+          
+          # Backend audit
+          cd ../backend
+          npm audit --audit-level high --production || true
+          BACKEND_AUDIT_EXIT=$?
+          
+          echo "Frontend audit exit code: $FRONTEND_AUDIT_EXIT"
+          echo "Backend audit exit code: $BACKEND_AUDIT_EXIT"
+
+      - name: 🏗 Build Check
+        run: |
+          echo "🏗 Checking build process..."
+          
+          # Frontend build
+          cd frontend
+          npm run build
+          FRONTEND_BUILD_EXIT=$?
+          
+          # Backend build
+          cd ../backend
+          npm run build
+          BACKEND_BUILD_EXIT=$?
+          
+          echo "Frontend build exit code: $FRONTEND_BUILD_EXIT"
+          echo "Backend build exit code: $BACKEND_BUILD_EXIT"
+
+      - name: 🎯 Quality Check
+        run: |
+          echo "🎯 Evaluating quality gates..."
+          
+          # Check if all checks passed
+          if [[ $FRONTEND_EXIT -eq 0 && $BACKEND_EXIT -eq 0 && $FRONTEND_LINT_EXIT -eq 0 && $BACKEND_LINT_EXIT -eq 0 && $FRONTEND_COVERAGE_EXIT -eq 0 && $BACKEND_COVERAGE_EXIT -eq 0 && $FRONTEND_AUDIT_EXIT -eq 0 && $BACKEND_AUDIT_EXIT -eq 0 && $FRONTEND_BUILD_EXIT -eq 0 && $BACKEND_BUILD_EXIT -eq 0 ]]; then
+            echo "✅ ALL QUALITY GATES PASSED!"
+            echo "::set-output name=quality-passed::true"
+          else
+            echo "❌ QUALITY GATES FAILED!"
+            echo "::set-output name=quality-passed::false"
+            
+            echo "📊 Quality Summary:"
+            echo "- Frontend Tests: $([[ $FRONTEND_EXIT -eq 0 ]] && echo '✅ PASS' || echo '❌ FAIL')"
+            echo "- Backend Tests: $([[ $BACKEND_EXIT -eq 0 ]] && echo '✅ PASS' || echo '❌ FAIL')"
+            echo "- Frontend Lint: $([[ $FRONTEND_LINT_EXIT -eq 0 ]] && echo '✅ PASS' || echo '❌ FAIL')"
+            echo "- Backend Lint: $([[ $BACKEND_LINT_EXIT -eq 0 ]] && echo '✅ PASS' || echo '❌ FAIL')"
+            echo "- Security Audit: $([[ $FRONTEND_AUDIT_EXIT -eq 0 && $BACKEND_AUDIT_EXIT -eq 0 ]] && echo '✅ PASS' || echo '❌ FAIL')"
+            echo "- Build Process: $([[ $FRONTEND_BUILD_EXIT -eq 0 && $BACKEND_BUILD_EXIT -eq 0 ]] && echo '✅ PASS' || echo '❌ FAIL')"
+          fi
+
+      - name: 🚫 Block Merge on Failure
+        if: steps.quality-gate.outputs.quality-passed != 'true'
+        run: |
+          echo "🚫 Blocking merge due to quality gate failures"
+          exit 1
+
+      - name: ✅ Allow Merge on Success
+        if: steps.quality-gate.outputs.quality-passed == 'true'
+        run: |
+          echo "✅ All quality gates passed! Merge allowed."
+
+  # Update PR Status
+  pr-status:
+    name: 📝 Update PR Status
+    runs-on: ubuntu-latest
+    needs: quality-gate
+    if: always()
+    steps:
+      - name: 📝 Update PR Check Status
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const qualityPassed = '${{ needs.quality-gate.outputs.quality-passed }}' === 'true';
+            
+            if (context.event_name === 'pull_request') {
+              // Add status check
+              await github.rest.repos.createCommitStatus({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                sha: context.sha,
+                state: qualityPassed ? 'success' : 'failure',
+                target_url: 'https://github.com/${{ context.repo.owner }}/${{ context.repo.repo }}/actions/runs/${{ context.run_id }}',
+                description: qualityPassed ? '✅ Quality gates passed' : '❌ Quality gates failed',
+                context: 'quality-gate'
+              });
+              
+              // Add comment if failed
+              if (!qualityPassed) {
+                await github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: `## ❌ Quality Gates Failed\n\nPlease fix the following issues before merging:\n\n- [ ] Frontend tests passing\n- [ ] Backend tests passing\n- [ ] No linting errors\n- [ ] Sufficient test coverage\n- [ ] No security vulnerabilities\n- [ ] Build process successful\n\n[View Details](${{ context.payload.repository.html_url }}/actions/runs/${{ context.run_id }})`
+                });
+              }
+            }

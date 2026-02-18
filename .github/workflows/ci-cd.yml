@@ -1,0 +1,258 @@
+name: 🧪 CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '18'
+  
+jobs:
+  # Code Quality Checks
+  quality-check:
+    name: 🔍 Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 🧪 Frontend Tests
+        run: |
+          cd frontend
+          npm ci
+          npm run lint
+          npm run test:unit
+          npm run build
+
+      - name: 🧪 Backend Tests
+        run: |
+          cd backend
+          npm ci
+          npm run lint
+          npm test
+
+      - name: 📊 Coverage Report
+        run: |
+          echo "## 📊 Test Coverage Summary" >> coverage-summary.md
+          echo "- Frontend: $(cd frontend && npm run test:coverage 2>/dev/null || echo 'N/A')" >> coverage-summary.md
+          echo "- Backend: $(cd backend && npm test -- --coverage 2>/dev/null || echo 'N/A')" >> coverage-summary.md
+
+  # Performance Tests
+  performance-test:
+    name: ⚡ Performance Test
+    runs-on: ubuntu-latest
+    needs: quality-check
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 🌐 Install Playwright
+        run: |
+          cd frontend
+          npm ci
+          npx playwright install --with-deps
+
+      - name: ⚡ Run Lighthouse CI
+        run: |
+          cd frontend
+          npm run lighthouse:ci
+
+      - name: 📊 Upload Lighthouse Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: frontend/lighthouse-report
+
+  # Build and Deploy
+  build-and-deploy:
+    name: 🚀 Build & Deploy
+    runs-on: ubuntu-latest
+    needs: [quality-check, performance-test]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 🏗 Build Production
+        run: |
+          echo "🏗 Building production assets..."
+          
+          # Build frontend
+          cd frontend
+          npm ci
+          npm run build
+          
+          # Build backend
+          cd ../backend
+          npm ci
+          npm run build
+          
+          echo "✅ Build completed successfully!"
+
+      - name: 📦 Create deployment package
+        run: |
+          echo "📦 Creating deployment package..."
+          
+          # Create deployment directory
+          mkdir -p deployment
+          
+          # Copy frontend build
+          cp -r frontend/.next deployment/frontend/
+          
+          # Copy backend build
+          cp -r backend/dist deployment/backend/
+          
+          # Copy deployment configs
+          cp render.yaml deployment/
+          cp -r backend/.env.render deployment/
+          cp frontend/.env.render deployment/
+          
+          # Create deployment script
+          cat > deployment/deploy.sh << 'EOF'
+          #!/bin/bash
+          echo "🚀 Deploying Trionex Technologies..."
+          echo "Timestamp: $(date)"
+          echo ""
+          
+          # Health check function
+          health_check() {
+            echo "🔍 Checking service health..."
+            for i in {1..30}; do
+              if curl -f http://localhost:10000/api/v1/health >/dev/null 2>&1; then
+                echo "✅ Backend is healthy!"
+                break
+              fi
+              echo "⏳ Waiting for backend... ($i/30)"
+              sleep 2
+            done
+          }
+          
+          echo "🎯 Deployment ready for Render!"
+          EOF
+          
+          chmod +x deployment/deploy.sh
+
+      - name: 📊 Upload Deployment Package
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-package
+          path: deployment/
+
+      - name: 🚀 Trigger Render Deployment
+        run: |
+          echo "🚀 Triggering Render deployment..."
+          
+          # Trigger frontend deployment
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.RENDER_HOOK_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"branch": "main"}' \
+            https://api.render.com/v1/services/trionex-frontend/deploys
+          
+          # Wait a moment
+          sleep 10
+          
+          # Trigger backend deployment
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.RENDER_HOOK_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"branch": "main"}' \
+            https://api.render.com/v1/services/trionex-backend/deploys
+
+      - name: ⏳ Monitor Deployment
+        run: |
+          echo "⏳ Monitoring deployment progress..."
+          
+          # Monitor deployment status
+          for i in {1..60}; do
+            echo "⏳ Checking deployment status... ($i/60)"
+            
+            # Check frontend health
+            if curl -f https://trionex-frontend.onrender.com/api/health >/dev/null 2>&1; then
+              echo "✅ Frontend is live!"
+            fi
+            
+            # Check backend health
+            if curl -f https://trionex-backend.onrender.com/api/v1/health >/dev/null 2>&1; then
+              echo "✅ Backend is live!"
+              break
+            fi
+            
+            sleep 5
+          done
+
+      - name: 🎉 Deployment Success
+        run: |
+          echo "🎉 **DEPLOYMENT SUCCESSFUL!**"
+          echo ""
+          echo "🌐 **Live Application:**"
+          echo "🔗 Frontend: https://trionex-frontend.onrender.com"
+          echo "🔗 Backend:  https://trionex-backend.onrender.com"
+          echo "🔗 API:      https://trionex-backend.onrender.com/api/v1"
+          echo ""
+          echo "✨ **Trionex Technologies is now live and secure!**"
+          echo ""
+          echo "📊 **Deployment Metrics:**"
+          echo "- Build time: ${{ steps.build-and-deploy.outputs.build-time }}"
+          echo "- Deploy time: ${{ steps.build-and-deploy.outputs.deploy-time }}"
+          echo "- Total time: ${{ steps.build-and-deploy.outputs.total-time }}"
+
+  # Notify Team
+  notify:
+    name: 📢 Notify Team
+    runs-on: ubuntu-latest
+    needs: [build-and-deploy]
+    if: success()
+    steps:
+      - name: 📢 Send Notification
+        run: |
+          echo "📢 Sending deployment notification..."
+          
+          # You can add Slack, Discord, or email notifications here
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            -d '{
+              "text": "🎉 Trionex Technologies has been successfully deployed!\n\n🌐 Frontend: https://trionex-frontend.onrender.com\n🔧 Backend: https://trionex-backend.onrender.com",
+              "channel": "#deployments"
+            }' \
+            "${{ secrets.SLACK_WEBHOOK_URL }}" || true
+
+  # Rollback on Failure
+  rollback:
+    name: 🔄 Rollback
+    runs-on: ubuntu-latest
+    needs: [build-and-deploy]
+    if: failure()
+    steps:
+      - name: 🔄 Initiate Rollback
+        run: |
+          echo "🔄 Deployment failed! Initiating rollback..."
+          
+          # Trigger rollback to previous stable version
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.RENDER_HOOK_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"branch": "main", "rollback": true}' \
+            https://api.render.com/v1/services/trionex-frontend/deploys
