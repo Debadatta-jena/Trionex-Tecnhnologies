@@ -44,10 +44,3 @@ services:
         value: https://trionex.onrender.com
       - key: CORS_ORIGIN
         value: https://trionex.onrender.com
-
-  # PostgreSQL Database
-  - type: pserv
-    name: trionex-db
-    plan: free
-    databaseName: ai_solutions
-    user: postgres
