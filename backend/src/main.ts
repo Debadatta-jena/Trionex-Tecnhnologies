@@ -5,9 +5,8 @@ import { ConfigService } from "@nestjs/config";
 import { AppModule } from "./app.module";
 import { WINSTON_MODULE_NEST_PROVIDER } from "nest-winston";
 import helmet from "helmet";
-import session from 'express-session';
+import { session } from 'express-session';
 import { SecurityMiddleware } from "./common/middleware/security.middleware";
-import "./common/types/session.types";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
