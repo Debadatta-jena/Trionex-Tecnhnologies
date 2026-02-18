@@ -29,7 +29,8 @@ async function bootstrap() {
     }),
   );
 
-  // Session configuration for CSRF protection
+  // Session configuration for CSRF protection (temporarily disabled)
+  /*
   app.use(
     session({
       secret: configService.get('SESSION_SECRET') || 'fallback-session-secret-change-in-production',
@@ -43,6 +44,7 @@ async function bootstrap() {
       },
     }),
   );
+  */
 
   // Custom security middleware
   app.use(new SecurityMiddleware().use);
