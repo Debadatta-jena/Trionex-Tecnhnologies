@@ -34,7 +34,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isTyping = false }) 
         <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
           <span className="text-white text-sm font-bold">AI</span>
         </div>
-        <div className="bg-gray-100 text-gray-900 rounded-2xl rounded-tl-none px-4 py-3 max-w-xs">
+        <div className="bg-white text-black rounded-2xl rounded-tl-none px-4 py-3 max-w-xs border border-gray-200">
           <div className="flex space-x-1">
             <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
             <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
@@ -65,7 +65,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isTyping = false }) 
       {/* Message Bubble */}
       <div className={`max-w-xs lg:max-w-md ${
         isBot 
-          ? 'bg-gray-100 text-gray-900 rounded-2xl rounded-tl-none' 
+          ? 'bg-white text-black rounded-2xl rounded-tl-none border border-gray-200' 
           : 'bg-blue-600 text-white rounded-2xl rounded-tr-none'
       } px-4 py-3`}>
         <p className="text-sm leading-relaxed whitespace-pre-wrap">

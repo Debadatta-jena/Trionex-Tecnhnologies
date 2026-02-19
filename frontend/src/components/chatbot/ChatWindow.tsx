@@ -358,7 +358,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isOpen, onClose }) => {
           </div>
 
           {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-gray-50">
+          <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-white">
             {conversation.messages.map((message) => (
               <ChatMessage key={message.id} message={message} />
             ))}
