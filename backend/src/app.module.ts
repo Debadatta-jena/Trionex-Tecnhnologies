@@ -74,6 +74,9 @@ import { SecurityMiddleware } from "./common/middleware/security.middleware";
           // Enable WAL mode for better performance
           journalMode: 'WAL',
         },
+        // Disable connection retry for production
+        retryAttempts: 0,
+        retryDelay: 0,
       }),
       inject: [ConfigService],
     }),

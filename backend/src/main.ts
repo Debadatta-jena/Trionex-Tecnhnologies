@@ -94,7 +94,7 @@ async function bootstrap() {
   const port = 10000;
     console.log(`🔧 Starting server on port: ${port}`);
     
-    const server = await app.listen(port);
+    const server = await app.listen(port, '0.0.0.0');
     console.log(`✅ Server started successfully on port: ${port}`);
     console.log(`🚀 Application is running on port: ${port}`);
     console.log(`📚 API Documentation: http://localhost:${port}/api/docs`);
