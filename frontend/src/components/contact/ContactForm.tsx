@@ -48,7 +48,6 @@ export function ContactForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setErrors({})
-    setSubmitStatus('idle')
 
     const validationErrors = validateForm()
     if (Object.keys(validationErrors).length > 0) {
