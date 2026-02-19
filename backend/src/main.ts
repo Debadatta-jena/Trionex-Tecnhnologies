@@ -98,7 +98,7 @@ async function bootstrap() {
   }
 
   const port = 10000;
-  await app.listen(port, '0.0.0.0');
+  await app.listen(port);
 
   console.log(`🚀 Application is running on port: ${port}`);
   console.log(`📚 API Documentation: http://localhost:${port}/api/docs`);
