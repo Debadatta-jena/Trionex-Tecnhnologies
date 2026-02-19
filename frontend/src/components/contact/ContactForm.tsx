@@ -14,7 +14,7 @@ export function ContactForm() {
     newsletter: false
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [errors, setErrors] = useState<{[key: string]: string}>({})
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
@@ -25,10 +25,38 @@ export function ContactForm() {
     }))
   }
 
+  const validateForm = () => {
+    const newErrors: {[key: string]: string} = {}
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required'
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required'
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address'
+    }
+
+    if (!formData.message.trim()) {
+      newErrors.message = 'Message is required'
+    }
+
+    return newErrors
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsSubmitting(true)
+    setErrors({})
     setSubmitStatus('idle')
+
+    const validationErrors = validateForm()
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors)
+      return
+    }
+
+    setIsSubmitting(true)
 
     try {
       // Map form data to backend format
@@ -86,6 +114,7 @@ export function ContactForm() {
             onChange={handleChange}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white text-gray-900"
           />
+          {errors.name && <span className="text-red-500 text-sm mt-1 block">{errors.name}</span>}
         </div>
         
         <div>
@@ -116,6 +145,7 @@ export function ContactForm() {
           onChange={handleChange}
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white text-gray-900"
         />
+        {errors.email && <span className="text-red-500 text-sm mt-1 block">{errors.email}</span>}
       </div>
       
       <div>
@@ -168,6 +198,7 @@ export function ContactForm() {
           onChange={handleChange}
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none bg-white text-gray-900"
         />
+        {errors.message && <span className="text-red-500 text-sm mt-1 block">{errors.message}</span>}
       </div>
       
       <div className="flex items-center">
