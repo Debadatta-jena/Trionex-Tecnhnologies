@@ -28,6 +28,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@hello-pangea/dnd": "^16.5.0",
     "@headlessui/react": "^1.7.17",
+    "next-plausible": "^4.0.0",
     "@lingui/cli": "^4.5.0",
     "@lingui/core": "^4.5.0",
     "@lingui/loader": "^4.5.0",
