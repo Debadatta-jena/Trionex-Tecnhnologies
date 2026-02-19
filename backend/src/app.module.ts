@@ -54,16 +54,12 @@ import { SecurityMiddleware } from "./common/middleware/security.middleware";
       inject: [ConfigService],
     }),
 
-    // PostgreSQL Database Configuration
+    // SQLite Database Configuration
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
-        type: "postgres",
-        host: configService.get("DB_HOST") || "localhost",
-        port: +(configService.get("DB_PORT") || 5432),
-        username: configService.get("DB_USERNAME") || "postgres",
-        password: configService.get("DB_PASSWORD") || "password",
-        database: configService.get("DB_DATABASE") || "trionex_db",
+        type: "sqlite",
+        database: "database.sqlite",
         entities: [User, Project, Testimonial, Contact, Feedback],
         synchronize: configService.get("NODE_ENV") === "development",
         logging: configService.get("NODE_ENV") === "development",
