@@ -65,6 +65,15 @@ import { SecurityMiddleware } from "./common/middleware/security.middleware";
         logging: configService.get("NODE_ENV") === "development",
         migrations: ["dist/migrations/*.js"],
         migrationsRun: true,
+        // SQLite specific options
+        driverOptions: {
+          // Enable foreign key constraints
+          foreignKeys: true,
+          // Set busy timeout
+          busyTimeout: 30000,
+          // Enable WAL mode for better performance
+          journalMode: 'WAL',
+        },
       }),
       inject: [ConfigService],
     }),
