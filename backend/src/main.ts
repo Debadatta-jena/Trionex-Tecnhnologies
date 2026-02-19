@@ -42,7 +42,11 @@ async function bootstrap() {
 
     // CORS
     app.enableCors({
-      origin: configService.get("CORS_ORIGIN") || "http://localhost:3000",
+      origin: [
+        "http://localhost:3000",
+        "https://trionex-tecnhnologies.onrender.com",
+        "https://trionex.onrender.com"
+      ],
       credentials: true,
     });
     console.log('✅ CORS configured');
