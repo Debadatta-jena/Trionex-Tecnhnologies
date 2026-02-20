@@ -16,6 +16,7 @@ import { ContactModule } from "./contact/contact.module";
 import { StatsModule } from "./stats/stats.module";
 import { FeedbackModule } from "./feedback/feedback.module";
 import { HealthModule } from "./health/health.module";
+import { AiModule } from "./ai/ai.module";
 
 import { User } from "./users/entities/user.entity";
 import { Project } from "./projects/entities/project.entity";
@@ -88,6 +89,7 @@ import { SecurityMiddleware } from "./common/middleware/security.middleware";
     StatsModule,
     FeedbackModule,
     HealthModule,
+    AiModule,
   ],
   controllers: [],
   providers: [

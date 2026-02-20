@@ -51,6 +51,26 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isOpen, onClose }) => {
     scrollToBottom()
   }, [conversation.messages.length, isTyping])
 
+  // Load conversation history from localStorage
+  useEffect(() => {
+    const savedHistory = localStorage.getItem('chatbot_history');
+    if (savedHistory) {
+      try {
+        const parsed = JSON.parse(savedHistory);
+        if (Array.isArray(parsed)) {
+          setConversation({ ...conversation, messages: parsed });
+        }
+      } catch (error) {
+        console.error('Failed to load chat history:', error);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    // Save conversation history to localStorage
+    localStorage.setItem('chatbot_history', JSON.stringify(conversation.messages));
+  }, [conversation.messages]);
+
   // Initialize conversation when chat opens
   useEffect(() => {
     if (isOpen && conversation.messages.length === 0) {
