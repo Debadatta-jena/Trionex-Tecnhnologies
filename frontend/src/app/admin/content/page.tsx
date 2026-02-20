@@ -391,7 +391,7 @@ function ContentDashboard() {
                     <div className="aspect-square bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                       {asset.type === 'image' && (
                         <span title={asset.name} role="img" aria-label={asset.name}>
-                          <Image className="h-12 w-12 text-gray-400" aria-hidden="true" />
+                          <Image className="h-12 w-12 text-gray-400" aria-hidden="true" alt="" />
                         </span>
                       )}
                       {asset.type === 'video' && <Video className="h-12 w-12 text-gray-400" aria-hidden="true" />}
