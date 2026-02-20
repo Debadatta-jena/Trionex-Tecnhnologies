@@ -17,12 +17,14 @@ import { StatsModule } from "./stats/stats.module";
 import { FeedbackModule } from "./feedback/feedback.module";
 import { HealthModule } from "./health/health.module";
 import { AiModule } from "./ai/ai.module";
+import { FinancialModule } from "./financial/financial.module";
 
 import { User } from "./users/entities/user.entity";
 import { Project } from "./projects/entities/project.entity";
 import { Testimonial } from "./testimonials/entities/testimonial.entity";
 import { Contact } from "./contact/entities/contact.entity";
 import { Feedback } from "./feedback/entities/feedback.entity";
+import { Transaction } from "./financial/entities/transaction.entity";
 
 // Import security modules
 import { CsrfService } from "./common/services/csrf.service";
@@ -90,6 +92,7 @@ import { SecurityMiddleware } from "./common/middleware/security.middleware";
     FeedbackModule,
     HealthModule,
     AiModule,
+    FinancialModule,
   ],
   controllers: [],
   providers: [
