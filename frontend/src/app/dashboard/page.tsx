@@ -1,149 +1,281 @@
 import { Metadata } from 'next'
+import { Header } from '@/components/layout/Header'
+import { Footer } from '@/components/layout/Footer'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import {
+  User,
+  Settings,
+  FileText,
+  MessageSquare,
+  TrendingUp,
+  Calendar,
+  Mail,
+  Phone
+} from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 export const metadata: Metadata = {
-  title: 'Dashboard Overview - AI Solutions Company',
-  description: 'Dashboard overview with project statistics, recent activity, and quick actions.',
+  title: 'Dashboard - GLYVEXA',
+  description: 'Your personal dashboard for managing services and account information.',
 }
 
 export default function DashboardPage() {
+  const [user, setUser] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    // Get user data from localStorage
+    const userData = localStorage.getItem('user')
+    if (userData) {
+      try {
+        setUser(JSON.parse(userData))
+      } catch (error) {
+        console.error('Failed to parse user data:', error)
+      }
+    }
+    setIsLoading(false)
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <Header />
+        <main className="pt-20 pb-12">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                <p className="mt-4 text-gray-600 dark:text-gray-400">Loading dashboard...</p>
+              </div>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <Header />
+        <main className="pt-20 pb-12">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center">
+                <MessageSquare className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Access Required</h1>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">Please log in to access your dashboard.</p>
+                <Button asChild>
+                  <a href="/login">Login</a>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    )
+  }
+
+  // Mock data for dashboard
+  const recentActivities = [
+    { id: 1, type: 'service', title: 'AI Chatbot Consultation', date: '2024-01-15', status: 'completed' },
+    { id: 2, type: 'contact', title: 'Contact Form Submitted', date: '2024-01-12', status: 'pending' },
+    { id: 3, type: 'newsletter', title: 'Newsletter Subscription', date: '2024-01-10', status: 'active' },
+  ]
+
+  const services = [
+    { id: 1, name: 'Website Development', status: 'In Progress', progress: 75 },
+    { id: 2, name: 'AI Solutions', status: 'Completed', progress: 100 },
+  ]
+
   return (
-    <div className="space-y-6">
-      {/* Welcome Section */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">
-          Welcome back, Debadatta! 👋
-        </h1>
-        <p className="text-gray-600">
-          Here's an overview of your projects and recent activity.
-        </p>
-      </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <Header />
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-medium text-gray-600">Total Projects</h3>
-            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-              <span className="text-blue-600 font-semibold">📊</span>
-            </div>
-          </div>
-          <p className="text-2xl font-bold text-gray-900">12</p>
-          <p className="text-sm text-green-600">+2 this month</p>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-medium text-gray-600">Active Projects</h3>
-            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-              <span className="text-green-600 font-semibold">🚀</span>
-            </div>
-          </div>
-          <p className="text-2xl font-bold text-gray-900">3</p>
-          <p className="text-sm text-gray-500">In progress</p>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-medium text-gray-600">Completed</h3>
-            <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-              <span className="text-purple-600 font-semibold">✅</span>
-            </div>
-          </div>
-          <p className="text-2xl font-bold text-gray-900">9</p>
-          <p className="text-sm text-gray-500">Successfully delivered</p>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-medium text-gray-600">Testimonials</h3>
-            <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
-              <span className="text-orange-600 font-semibold">⭐</span>
-            </div>
-          </div>
-          <p className="text-2xl font-bold text-gray-900">5</p>
-          <p className="text-sm text-gray-500">Client feedback</p>
-        </div>
-      </div>
-
-      {/* Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Projects</h2>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+      <main className="pt-20 pb-12">
+        <div className="container mx-auto px-4">
+          {/* Welcome Section */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between">
               <div>
-                <h4 className="font-medium text-gray-900">E-Commerce Platform</h4>
-                <p className="text-sm text-gray-600">Completed 2 days ago</p>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                  Welcome back, {user.name || 'User'}!
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400 mt-2">
+                  Here's an overview of your account and recent activities.
+                </p>
               </div>
-              <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">Completed</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <div>
-                <h4 className="font-medium text-gray-900">AI Chatbot</h4>
-                <p className="text-sm text-gray-600">In progress</p>
-              </div>
-              <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">Active</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <div>
-                <h4 className="font-medium text-gray-900">Mobile App</h4>
-                <p className="text-sm text-gray-600">Started 1 week ago</p>
-              </div>
-              <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">Planning</span>
+              <Button variant="outline">
+                <Settings className="h-4 w-4 mr-2" />
+                Account Settings
+              </Button>
             </div>
           </div>
-        </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h2>
-          <div className="space-y-4">
-            <div className="flex items-start space-x-3">
-              <div className="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
-              <div className="flex-1">
-                <p className="text-sm text-gray-900">New testimonial received from TechMart Inc.</p>
-                <p className="text-xs text-gray-600">2 hours ago</p>
-              </div>
-            </div>
-            <div className="flex items-start space-x-3">
-              <div className="w-2 h-2 bg-green-600 rounded-full mt-2"></div>
-              <div className="flex-1">
-                <p className="text-sm text-gray-900">Project "E-Commerce Platform" marked as completed</p>
-                <p className="text-xs text-gray-600">2 days ago</p>
-              </div>
-            </div>
-            <div className="flex items-start space-x-3">
-              <div className="w-2 h-2 bg-purple-600 rounded-full mt-2"></div>
-              <div className="flex-1">
-                <p className="text-sm text-gray-900">New project "AI Analytics Platform" created</p>
-                <p className="text-xs text-gray-600">1 week ago</p>
-              </div>
-            </div>
+          {/* Profile Overview */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  Profile Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center space-x-4">
+                  <Avatar className="h-16 w-16">
+                    <AvatarFallback className="text-lg">
+                      {user.name?.charAt(0)?.toUpperCase() || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{user.name || 'User'}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{user.email}</p>
+                    <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                      <div className="flex items-center gap-1">
+                        <Mail className="h-3 w-3" />
+                        {user.email}
+                      </div>
+                      {user.phone && (
+                        <div className="flex items-center gap-1">
+                          <Phone className="h-3 w-3" />
+                          {user.phone}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5" />
+                  Account Statistics
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Services Used</span>
+                    <span className="font-semibold">{services.length}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Total Interactions</span>
+                    <span className="font-semibold">{recentActivities.length}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Account Status</span>
+                    <Badge variant="secondary">Active</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  Quick Actions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <Button className="w-full justify-start" variant="outline" size="sm">
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Contact Support
+                  </Button>
+                  <Button className="w-full justify-start" variant="outline" size="sm">
+                    <FileText className="h-4 w-4 mr-2" />
+                    View Services
+                  </Button>
+                  <Button className="w-full justify-start" variant="outline" size="sm">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Update Profile
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Services & Activities */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Current Services */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Your Services</CardTitle>
+                <CardDescription>Track your ongoing and completed projects</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {services.map((service) => (
+                    <div key={service.id} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                      <div className="flex justify-between items-start mb-2">
+                        <h4 className="font-medium text-gray-900 dark:text-white">{service.name}</h4>
+                        <Badge variant={service.status === 'Completed' ? 'default' : 'secondary'}>
+                          {service.status}
+                        </Badge>
+                      </div>
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div
+                          className="bg-blue-600 h-2 rounded-full"
+                          style={{ width: `${service.progress}%` }}
+                        ></div>
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                        {service.progress}% Complete
+                      </p>
+                    </div>
+                  ))}
+                  {services.length === 0 && (
+                    <p className="text-gray-500 dark:text-gray-400 text-center py-8">
+                      No active services. Explore our services to get started!
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Recent Activities */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Activities</CardTitle>
+                <CardDescription>Your latest interactions with GLYVEXA</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {recentActivities.map((activity) => (
+                    <div key={activity.id} className="flex items-start space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full">
+                        {activity.type === 'service' && <FileText className="h-4 w-4 text-blue-600" />}
+                        {activity.type === 'contact' && <MessageSquare className="h-4 w-4 text-green-600" />}
+                        {activity.type === 'newsletter' && <Mail className="h-4 w-4 text-purple-600" />}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">{activity.title}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                          {new Date(activity.date).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <Badge variant="outline" className="text-xs">
+                        {activity.status}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
-      </div>
+      </main>
 
-      {/* Quick Actions */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <button className="p-4 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors">
-            <div className="text-2xl mb-2">➕</div>
-            <p className="font-medium">New Project</p>
-          </button>
-          <button className="p-4 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors">
-            <div className="text-2xl mb-2">📝</div>
-            <p className="font-medium">Add Testimonial</p>
-          </button>
-          <button className="p-4 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors">
-            <div className="text-2xl mb-2">📊</div>
-            <p className="font-medium">View Reports</p>
-          </button>
-          <button className="p-4 bg-orange-50 text-orange-700 rounded-lg hover:bg-orange-100 transition-colors">
-            <div className="text-2xl mb-2">⚙️</div>
-            <p className="font-medium">Settings</p>
-          </button>
-        </div>
-      </div>
+      <Footer />
     </div>
   )
 }
