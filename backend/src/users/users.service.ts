@@ -2,19 +2,42 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  OnModuleInit,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { User, UserRole } from "./entities/user.entity";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
+import * as bcrypt from "bcrypt";
 
 @Injectable()
-export class UsersService {
+export class UsersService implements OnModuleInit {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
   ) {}
+
+  async onModuleInit() {
+    const adminEmail = 'debadattajena552@gmail.com';
+    const adminPassword = 'debadatta2004';
+
+    const existing = await this.findByEmail(adminEmail);
+    if (!existing) {
+      const hashedPassword = await bcrypt.hash(adminPassword, 10);
+      const admin = this.usersRepository.create({
+        name: 'Debadatta Jena',
+        email: adminEmail,
+        password: hashedPassword,
+        phone: '9692292496',
+        role: UserRole.ADMIN,
+        isActive: true,
+        isEmailVerified: true,
+      });
+      await this.usersRepository.save(admin);
+      console.log('✅ Admin user seeded successfully!');
+    }
+  }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const existingUser = await this.findByEmail(createUserDto.email);
