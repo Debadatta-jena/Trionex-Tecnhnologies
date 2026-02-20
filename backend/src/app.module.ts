@@ -54,29 +54,18 @@ import { SecurityMiddleware } from "./common/middleware/security.middleware";
       inject: [ConfigService],
     }),
 
-    // SQLite Database Configuration
+    // PostgreSQL Database Configuration
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
-        type: "sqlite",
-        database: "database.sqlite",
+        type: "postgres",
+        url: configService.get("DATABASE_URL"),
         entities: [User, Project, Testimonial, Contact, Feedback],
-        synchronize: true,
+        synchronize: configService.get("NODE_ENV") === "development",
         logging: configService.get("NODE_ENV") === "development",
         migrations: ["dist/migrations/*.js"],
         migrationsRun: true,
-        // SQLite specific options
-        driverOptions: {
-          // Enable foreign key constraints
-          foreignKeys: true,
-          // Set busy timeout
-          busyTimeout: 30000,
-          // Enable WAL mode for better performance
-          journalMode: 'WAL',
-        },
-        // Disable connection retry for production
-        retryAttempts: 0,
-        retryDelay: 0,
+        ssl: configService.get("NODE_ENV") === "production" ? { rejectUnauthorized: false } : false,
       }),
       inject: [ConfigService],
     }),
