@@ -15,6 +15,7 @@ import {
   storage,
   sanitizeInput 
 } from '@/lib/chatbot-utils'
+import { generateAIResponse } from '@/lib/api'
 import { 
   generateResponse, 
   getTimeBasedGreeting, 
@@ -262,13 +263,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isOpen, onClose }) => {
     showTypingIndicator()
     await delay(CHATBOT_CONFIG.typingDelay)
 
-    // Generate response using the brain
-    const context = {
-      userName: conversation.leadData?.name,
-      conversationCount: conversation.messages.length
-    }
-
-    const response = generateResponse(userInput, context)
+    // Generate response using backend AI
+    const response = await generateAIResponse(userInput, context)
 
     // Add bot response
     await addMessage(response.text, 'bot')
