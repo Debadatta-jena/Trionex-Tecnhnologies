@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Menu, X, Search, LogOut, Globe } from 'lucide-react';
+import { Menu, X, Search, LogOut, Globe, Sun, Moon } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -25,6 +26,7 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     // Check if user is logged in
@@ -70,7 +72,7 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white">
+    <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <div className="flex items-center gap-6 md:gap-10">
@@ -90,7 +92,7 @@ export function Header() {
                 href={item.href}
                 className={cn(
                   'text-sm font-medium transition-colors hover:text-blue-600 px-3 py-2 rounded-md',
-                  pathname === item.href ? 'text-blue-600' : 'text-gray-700'
+                  pathname === item.href ? 'text-blue-600' : 'text-gray-700 dark:text-gray-300'
                 )}
               >
                 {item.name}
@@ -110,13 +112,18 @@ export function Header() {
                 placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-64 pl-10 pr-4 bg-white text-gray-900"
+                className="w-64 pl-10 pr-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               />
             </div>
           </form>
 
+          {/* Theme Toggle */}
+          <Button variant="ghost" size="sm" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
+
           {/* Language Selector */}
-          <Button variant="ghost" size="sm" className="flex items-center gap-2 text-gray-600">
+          <Button variant="ghost" size="sm" className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
             <Globe className="h-4 w-4" />
             <span className="hidden sm:block">EN</span>
           </Button>
@@ -157,7 +164,7 @@ export function Header() {
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="fixed inset-0 bg-black/50" onClick={() => setMobileMenuOpen(false)} />
-          <div className="fixed right-0 top-0 bottom-0 w-80 bg-white p-6 overflow-y-auto">
+          <div className="fixed right-0 top-0 bottom-0 w-80 bg-white dark:bg-gray-900 p-6 overflow-y-auto">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center">
                 <img 
@@ -179,7 +186,7 @@ export function Header() {
                   href={item.href}
                   className={cn(
                     'block py-2 text-base font-medium',
-                    pathname === item.href ? 'text-blue-600' : 'text-gray-700'
+                    pathname === item.href ? 'text-blue-600' : 'text-gray-700 dark:text-gray-300'
                   )}
                   onClick={() => setMobileMenuOpen(false)}
                 >
